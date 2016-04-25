@@ -1,63 +1,94 @@
-import React from 'react';
+/* @flow */
 
-function on(element, type, callback) {
-  if (element.addEventListener) {
-    element.addEventListener(type, callback);
-  } else { // IE8+ Support
-    element.attachEvent(`on${type}`, () => {
-      callback.call(element);
+import React, {Component, PropTypes} from 'react';
+import shallowCompare from 'react-addons-shallow-compare';
+
+function on(node: Node, eventName: string, callback: Function, capture?: boolean): void {
+  if (node.addEventListener) {
+    node.addEventListener(eventName, callback, capture);
+  } 
+  else if (node.attachEvent) { // IE8+ Support
+    node.attachEvent(`on${eventName}`, () => {
+      callback.call(node);
     });
   }
 }
 
-function off(element, type, callback) {
-  if (element.removeEventListener) {
-    element.removeEventListener(type, callback);
-  } else { // IE8+ Support
-    element.detachEvent(`on${type}`, callback);
+function off(node: Node, eventName: string, callback: Function, capture?: boolean): void {
+  if (node.removeEventListener) {
+    node.removeEventListener(eventName, callback, capture);
+  } 
+  else if (node.detachEvent) { // IE8+ Support
+    node.detachEvent(`on${eventName}`, callback);
   }
 }
 
-function listenersForEach(props, callback) {
-  const {
-    elementName,
-    ...other,
-  } = props;
+type Props = {
+  children?: React.Element,
+  capture: boolean,
+  node?: Node,
+  [event: string]: Function
+};
 
-  const element = window[elementName];
+type DefaultProps = {
+  capture: boolean
+};
 
-  for (const eventIdentifier in other) {
-    const eventName = eventIdentifier.substring(2).toLowerCase();
-
-    callback(element, eventName, other[eventIdentifier]);
+function forEachListener(props: Props, iteratee: (eventName: string, listener: Function) => any): void {
+  for (const name in props) {
+    if (name.substring(0, 2) === 'on' && props[name] instanceof Function) {
+      const eventName = name.substring(2).toLowerCase();
+      iteratee(eventName, props[name]);
+    }
   }
 }
 
-export default class EventListener extends React.Component {
+export default class EventListener extends Component<DefaultProps,Props,void> {
   static propTypes = {
-    /**
-     * Name of the element that we will be listening to.
-     */
-    elementName: React.PropTypes.string,
+    capture: PropTypes.bool,
+    children: PropTypes.node,
+    node: PropTypes.instanceOf(Node)
   };
 
-  constructor(props) {
-    super(props);
-  }
+  static defaultProps = {
+    capture: false
+  };
+
+  addListeners: () => void = () => {
+    const {capture, node} = this.props;
+    if (node) {
+      forEachListener(this.props, (eventName, listener) => on(node, eventName, listener, capture));
+    }
+  };
+
+  removeListeners: () => void = () => {
+    const {capture, node} = this.props;
+    if (node) {
+      forEachListener(this.props, (eventName, listener) => off(node, eventName, listener, capture));
+    }
+  };
 
   componentDidMount() {
-    listenersForEach(this.props, (element, eventName, callback) => {
-      on(element, eventName, callback);
-    });
+    this.addListeners();
+  }
+
+  shouldComponentUpdate(nextProps: Props): boolean {
+    return shallowCompare(this, nextProps);
+  }
+
+  componentWillUpdate() {
+    this.removeListeners();
+  }
+
+  componentDidUpdate() {
+    this.addListeners();
   }
 
   componentWillUnmount() {
-    listenersForEach(this.props, (element, eventName, callback) => {
-      off(element, eventName, callback);
-    });
+    this.removeListeners();
   }
 
-  render() {
+  render(): ?React.Element {
     return null;
   }
 }

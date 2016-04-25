@@ -7,7 +7,7 @@
     "clean": "rimraf lib",
     "prebuild": "npm run lint && npm run clean",
     "build": "babel src --out-dir lib",
-    "lint": "eslint src",
+    "lint": "eslint src && flow status",
     "pretest:cov": "npm run lint",
     "pretest": "npm run lint",
     "test:cov": "babel-node ./node_modules/.bin/isparta cover --report lcov _mocha -- $npm_package_config_mocha",
@@ -53,5 +53,8 @@
     "react-addons-test-utils": "^15.0.1",
     "react-dom": "^15.0.1",
     "rimraf": "^2.4.3"
+  },
+  "dependencies": {
+    "react-addons-shallow-compare": "^15.0.1"
   }
 }
