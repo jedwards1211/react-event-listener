@@ -55,8 +55,8 @@ export default class EventListener extends Component<DefaultProps, Props, void> 
     this.addListeners();
   }
 
-  shouldComponentUpdate(nextProps: Props): boolean {
-    return shallowCompare(this, nextProps);
+  shouldComponentUpdate(nextProps: Props, nextState: any): boolean {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   componentWillUpdate() {

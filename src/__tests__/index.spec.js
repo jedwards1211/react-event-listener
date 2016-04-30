@@ -131,6 +131,19 @@ describe('EventListener', () => {
       document.body.click();
       expect(spy).toHaveBeenCalled();
     });
+    it("doesn't update if no props changed", () => {
+      const spy = createSpy();
+      const inst = render(<EventListener target={document.body} onClick={spy} />, node);
+      const _componentWillUpdate = inst.componentWillUpdate;
+      let updated = false;
+      inst.componentWillUpdate = function(...args) {
+        expect(args[0].target).toBe(document.body);
+        updated = true;
+        _componentWillUpdate.apply(this, args);
+      };
+      render(<EventListener target={document.body} onClick={spy} />, node);
+      expect(updated).toBe(false);
+    });
   });
 
   context('with capture', () => {
