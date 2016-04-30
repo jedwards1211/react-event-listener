@@ -6,8 +6,7 @@ import shallowCompare from 'react-addons-shallow-compare';
 function on(target: Object, eventName: string, callback: Function, capture?: boolean): void {
   if (target.addEventListener) {
     target.addEventListener(eventName, callback, capture);
-  } 
-  else if (target.attachEvent) { // IE8+ Support
+  } else if (target.attachEvent) { // IE8+ Support
     target.attachEvent(`on${eventName}`, () => {
       callback.call(target);
     });
@@ -17,8 +16,7 @@ function on(target: Object, eventName: string, callback: Function, capture?: boo
 function off(target: Object, eventName: string, callback: Function, capture?: boolean): void {
   if (target.removeEventListener) {
     target.removeEventListener(eventName, callback, capture);
-  } 
-  else if (target.detachEvent) { // IE8+ Support
+  } else if (target.detachEvent) { // IE8+ Support
     target.detachEvent(`on${eventName}`, callback);
   }
 }
@@ -43,28 +41,14 @@ function forEachListener(props: Props, iteratee: (eventName: string, listener: F
   }
 }
 
-export default class EventListener extends Component<DefaultProps,Props,void> {
+export default class EventListener extends Component<DefaultProps, Props, void> {
   static propTypes = {
     capture: PropTypes.bool,
-    target: PropTypes.object
+    target: PropTypes.object,
   };
 
   static defaultProps = {
-    capture: false
-  };
-
-  addListeners: () => void = () => {
-    const {capture, target} = this.props;
-    if (target) {
-      forEachListener(this.props, (eventName, listener) => on(target, eventName, listener, capture));
-    }
-  };
-
-  removeListeners: () => void = () => {
-    const {capture, target} = this.props;
-    if (target) {
-      forEachListener(this.props, (eventName, listener) => off(target, eventName, listener, capture));
-    }
+    capture: false,
   };
 
   componentDidMount() {
@@ -86,6 +70,20 @@ export default class EventListener extends Component<DefaultProps,Props,void> {
   componentWillUnmount() {
     this.removeListeners();
   }
+
+  addListeners: () => void = () => {
+    const {capture, target} = this.props;
+    if (target) {
+      forEachListener(this.props, (eventName, listener) => on(target, eventName, listener, capture));
+    }
+  };
+
+  removeListeners: () => void = () => {
+    const {capture, target} = this.props;
+    if (target) {
+      forEachListener(this.props, (eventName, listener) => off(target, eventName, listener, capture));
+    }
+  };
 
   render(): ?React.Element {
     return null;

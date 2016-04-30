@@ -83,67 +83,67 @@ describe('EventListener', () => {
       });
     });
   });
-  
-  context("with no node", () => {
+
+  context('with no node', () => {
     it("doesn't throw error", () => {
       render(<EventListener onClick={() => {}} />, node);
-    }); 
+    });
   });
-  
-  context("when props change", () => {
-    it("removes old listeners", () => {
+
+  context('when props change', () => {
+    it('removes old listeners', () => {
       const spy = createSpy();
 
       render(<EventListener target={document.body} onClick={spy} />, node);
       render(<EventListener target={document.body} />, node);
-      
+
       document.body.click();
       expect(spy).toNotHaveBeenCalled();
     });
-    it("adds new listeners", () => {
+    it('adds new listeners', () => {
       const spy = createSpy();
 
       render(<EventListener target={document.body} />, node);
-      
+
       document.body.click();
       expect(spy).toNotHaveBeenCalled();
-      
+
       render(<EventListener target={document.body} onClick={spy} />, node);
-      
+
       document.body.click();
       expect(spy).toHaveBeenCalled();
     });
-    it("removes listeners from old node", () => {
+    it('removes listeners from old node', () => {
       const spy = createSpy();
 
       render(<EventListener target={document.body} onClick={spy} />, node);
       render(<EventListener onClick={spy} />, node);
-      
+
       document.body.click();
       expect(spy).toNotHaveBeenCalled();
     });
-    it("adds listeners to new node", () => {
+    it('adds listeners to new node', () => {
       const spy = createSpy();
 
       render(<EventListener onClick={spy} />, node);
       render(<EventListener target={document.body} onClick={spy} />, node);
-      
+
       document.body.click();
       expect(spy).toHaveBeenCalled();
     });
   });
-  
-  context("with capture", () => {
-    it("attaches listeners with capture", () => {
+
+  context('with capture', () => {
+    it('attaches listeners with capture', () => {
       let button;
 
-      let calls = [];
+      const calls = [];
 
       render(<div>
-        <EventListener target={document} capture onClick={() => calls.push('outer')} />
-        <button ref={c => button = c} onClick={() => calls.push('inner')} />
+        <EventListener target={document} capture={true} onClick={() => calls.push('outer')} />
+        <button ref={(c) => button = c} onClick={() => calls.push('inner')} />
       </div>, node);
-      
+
       expect(calls.length).toBe(0);
       button.click();
       expect(calls).toEqual(['outer', 'inner']);
